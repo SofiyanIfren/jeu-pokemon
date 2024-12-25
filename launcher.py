@@ -2,6 +2,8 @@ import pygame
 import sys
 import random
 
+from player import Player
+
 # Initialiser Pygame
 pygame.init()
 
@@ -30,23 +32,24 @@ lose_sound = pygame.mixer.Sound('sounds/lose_sound.mp3')
 white = (255, 255, 255)
 black = (0, 0, 0)
 
-# Charger les images du joueur
-player_images_right = [
-    pygame.image.load('sprites/sacha_1.png'),
-    pygame.image.load('sprites/sacha_2.png'),
-    pygame.image.load('sprites/sacha_3.png')
-]
-player_images_left = [
-    pygame.image.load('sprites/sacha_left_1.png'),
-    pygame.image.load('sprites/sacha_left_2.png'),
-    pygame.image.load('sprites/sacha_left_3.png')
-]
-player_size = player_images_right[0].get_size()
-player_x = screen_width // 4
-player_y = screen_height - player_size[1] - 75
-player_speed = 5
+# # Charger les images du joueur
+# player_images_right = [
+#     pygame.image.load('sprites/sacha_1.png'),
+#     pygame.image.load('sprites/sacha_2.png'),
+#     pygame.image.load('sprites/sacha_3.png')
+# ]
+# player_images_left = [
+#     pygame.image.load('sprites/sacha_left_1.png'),
+#     pygame.image.load('sprites/sacha_left_2.png'),
+#     pygame.image.load('sprites/sacha_left_3.png')
+# ]
+# player_size = player_images_right[0].get_size()
+# player.x = screen_width // 4
+# player.y = screen_height - player_size[1] - 75
+# player_speed = 5
 player_jump = False
 player_jump_count = 10
+
 
 # Variables pour l'animation
 animation_index = 0
@@ -57,6 +60,10 @@ terrain_speed = 15
 terrain_x = 0
 ground_image = pygame.image.load('sprites/sol.png')
 ground_width = ground_image.get_width()
+
+
+# Instancier la classe Player
+player = Player(screen_width, screen_height, ground_image, terrain_speed)
 
 # Variables pour les obstacles
 obstacle_image = pygame.image.load('sprites/obstacle.png')
@@ -95,8 +102,9 @@ while running:
             if lives <= 0:
                 running = False
             else:
-                player_x = screen_width // 4
-                player_y = screen_height - player_size[1] - 75
+                player.x = screen_width // 4
+                # player.y = screen_height - player_size[1] - 75
+                player.y = screen_height - player.size[1] - 75
                 player_jump = False
                 player_jump_count = 10
                 obstacles = []
@@ -115,7 +123,7 @@ while running:
                 neg = 1
                 if player_jump_count < 0:
                     neg = -1
-                player_y -= (player_jump_count ** 2) * 0.5 * neg
+                player.y -= (player_jump_count ** 2) * 0.5 * neg
                 player_jump_count -= 1
             else:
                 player_jump = False
@@ -125,12 +133,12 @@ while running:
         if keys[pygame.K_RIGHT]:
             terrain_x -= terrain_speed
             animation_index += animation_speed
-            if animation_index >= len(player_images_right):
+            if animation_index >= len(player.images_right):
                 animation_index = 0
         elif keys[pygame.K_LEFT]:
             terrain_x += terrain_speed
             animation_index += animation_speed
-            if animation_index >= len(player_images_left):
+            if animation_index >= len(player.images_left):
                 animation_index = 0
 
         if terrain_x < -ground_width:
@@ -156,7 +164,7 @@ while running:
         obstacles = [obstacle for obstacle in obstacles if obstacle[0] > -obstacle_width]
 
         # Vérifier les collisions avec les obstacles
-        player_rect = pygame.Rect(player_x + 10, player_y + 10, player_size[0] - 20, player_size[1] - 20)
+        player_rect = pygame.Rect(player.x + 10, player.y + 10, player.size[0] - 20, player.size[1] - 20)
         for obstacle in obstacles:
             obstacle_rect = pygame.Rect(obstacle[0] + 10, obstacle[1] + 10, obstacle_width - 20, obstacle_height - 20)
             if player_rect.colliderect(obstacle_rect):
@@ -164,7 +172,7 @@ while running:
 
         # Incrémenter le score si le joueur dépasse un obstacle
         for obstacle in obstacles:
-            if player_x > obstacle[0] + obstacle_width:
+            if player.x > obstacle[0] + obstacle_width:
                 score += 1
                 obstacles.remove(obstacle)
                 break
@@ -182,11 +190,11 @@ while running:
 
     # Dessiner l'image du joueur
     if keys[pygame.K_RIGHT]:
-        screen.blit(player_images_right[int(animation_index)], (player_x, player_y))
+        screen.blit(player.images_right[int(animation_index)], (player.x, player.y))
     elif keys[pygame.K_LEFT]:
-        screen.blit(player_images_left[int(animation_index)], (player_x, player_y))
+        screen.blit(player.images_left[int(animation_index)], (player.x, player.y))
     else:
-        screen.blit(player_images_right[0], (player_x, player_y))
+        screen.blit(player.images_right[0], (player.x, player.y))
 
     # Afficher le nombre de vies
     font = pygame.font.Font(None, 36)
