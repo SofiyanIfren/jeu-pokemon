@@ -25,6 +25,9 @@ class Player:
         self.screen_height = screen_height
         self.ground_image = ground_image
         self.terrain_speed = terrain_speed
+        self.player_jump = False
+        self.player_jump_count = 10
+        self.lives = 3
 
     def reset(self):
         self.x = self.screen_width // 4
